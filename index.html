@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaStar Hotels · Octopus Pipeline Output</title>
+
+  <!-- OG / Twitter Card -->
+  <meta property="og:title" content="NovaStar Hotels · Octopus AI Pipeline" />
+  <meta property="og:description" content="A 5-agent workflow that turns one-time guests into loyal repeat customers." />
+  <meta property="og:type" content="website" />
+  <!-- <meta property="og:image" content="og-image.jpg" /> 1200x630 -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NovaStar Hotels · Octopus AI Pipeline" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐙</text></svg>" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── CSS VARIABLES ─────────────────────────────────────────────── */
+    :root {
+      --bg:          #020a18;
+      --bg-grad:     linear-gradient(170deg,#020a18,#041028 40%,#06142e 70%,#020a18);
+      --surface:     rgba(8,24,56,0.85);
+      --border:      rgba(0,170,255,0.12);
+      --text:        #d0e0f0;
+      --text-bright: #e8f0ff;
+      --text-dim:    #6888aa;
+      --neon:        #00aaff;
+      --cyan:        #00e5ff;
+      --green:       #00ff88;
+      --amber:       #ffaa00;
+      --red:         #ff4466;
+      --purple:      #aa66ff;
+      --header-h:    64px;
+      --radius:      14px;
+      --transition:  0.3s ease;
+    }
+
+    /* ─── LIGHT MODE ────────────────────────────────────────────────── */
+    html.light {
+      --bg:          #f0f4fa;
+      --bg-grad:     linear-gradient(170deg,#e8eef8,#dce6f4 40%,#d0ddf0 70%,#e8eef8);
+      --surface:     rgba(255,255,255,0.85);
+      --border:      rgba(0,100,200,0.15);
+      --text:        #1a2a3a;
+      --text-bright: #0a1828;
+      --text-dim:    #5572a0;
+      --neon:        #0077cc;
+      --cyan:        #0099cc;
+      --green:       #009955;
+      --amber:       #cc7700;
+      --red:         #cc2244;
+      --purple:      #6633cc;
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg-grad);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND LAYERS ─────────────────────────────────────────── */
+    .bg-fixed {
+      position: fixed; inset: 0;
+      background: var(--bg-grad);
+      z-index: -3;
+    }
+
+    /* Grid */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: -2;
+      background-image:
+        linear-gradient(rgba(0,170,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,170,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    html.light .bg-grid {
+      background-image:
+        linear-gradient(rgba(0,100,200,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,100,200,0.05) 1px, transparent 1px);
+    }
+
+    /* Orbs — outside 880px column */
+    .orb {
+      position: fixed; z-index: -1;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 420px; height: 420px;
+      background: rgba(0,170,255,0.12);
+      top: -100px; left: -180px;
+      animation: orbit1 18s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 360px; height: 360px;
+      background: rgba(170,102,255,0.10);
+      bottom: -80px; right: -150px;
+      animation: orbit2 24s ease-in-out infinite;
+    }
+    @keyframes orbit1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(60px,80px) scale(1.1); }
+      66%      { transform: translate(-40px,40px) scale(0.9); }
+    }
+    @keyframes orbit2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(-70px,-60px) scale(1.15); }
+      66%      { transform: translate(50px,-30px) scale(0.9); }
+    }
+
+    /* ─── HEADER ────────────────────────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--header-h);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(2,10,24,0.72);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px;
+    }
+    html.light header { background: rgba(240,244,250,0.80); }
+
+    .header-inner {
+      max-width: 880px; width: 100%; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 1rem; color: var(--text-bright);
+      text-decoration: none;
+    }
+    .logo-icon { font-size: 1.4rem; }
+    .logo-tag {
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em;
+      color: var(--neon); text-transform: uppercase;
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .nav-pills { display: flex; gap: 4px; }
+    .nav-pill {
+      font-size: 0.75rem; font-weight: 500;
+      padding: 4px 12px; border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--text-dim); background: transparent;
+      cursor: pointer; transition: var(--transition);
+      text-decoration: none;
+    }
+    .nav-pill:hover { color: var(--text-bright); border-color: var(--neon); }
+
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: var(--transition);
+    }
+    .theme-btn:hover { border-color: var(--neon); color: var(--neon); }
+
+    /* ─── CONTENT CONTAINER ─────────────────────────────────────────── */
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ─── HERO ──────────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 72px 0 56px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--neon);
+      border: 1px solid rgba(0,170,255,0.25);
+      border-radius: 99px; padding: 5px 14px;
+      margin-bottom: 24px;
+      background: rgba(0,170,255,0.06);
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800; line-height: 1.15;
+      color: var(--text-bright);
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--neon); }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--text-dim);
+      max-width: 540px; margin: 0 auto 36px;
+    }
+
+    /* Pipeline flow diagram */
+    .pipeline-flow {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 0; margin: 0 auto;
+    }
+    .pf-agent {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 16px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface);
+      backdrop-filter: blur(10px);
+      min-width: 110px;
+      position: relative;
+    }
+    .pf-emoji { font-size: 1.5rem; }
+    .pf-role { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    .pf-name { font-size: 0.8rem; font-weight: 600; color: var(--text-bright); }
+    .pf-arrow { font-size: 1.2rem; color: var(--border); padding: 0 4px; }
+    .pf-agent[data-color="yellow"] { border-color: rgba(255,220,0,0.3); }
+    .pf-agent[data-color="yellow"] .pf-name { color: #ffdd00; }
+    .pf-agent[data-color="orange"] { border-color: rgba(255,140,0,0.3); }
+    .pf-agent[data-color="orange"] .pf-name { color: #ff8c00; }
+    .pf-agent[data-color="blue"]   { border-color: rgba(0,170,255,0.3); }
+    .pf-agent[data-color="blue"]   .pf-name { color: var(--neon); }
+    .pf-agent[data-color="green"]  { border-color: rgba(0,255,136,0.3); }
+    .pf-agent[data-color="green"]  .pf-name { color: var(--green); }
+    .pf-agent[data-color="purple"] { border-color: rgba(170,102,255,0.3); }
+    .pf-agent[data-color="purple"] .pf-name { color: var(--purple); }
+
+    /* ─── SECTION HEADER ────────────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin: 56px 0 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 1.25rem; font-weight: 700; color: var(--text-bright);
+    }
+    .section-header p { font-size: 0.85rem; color: var(--text-dim); margin-top: 2px; }
+    .agent-tag {
+      margin-left: auto; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 6px; flex-shrink: 0;
+    }
+
+    /* Colour variants per agent */
+    .yellow .section-icon { background: rgba(255,220,0,0.12); border: 1px solid rgba(255,220,0,0.25); }
+    .yellow .agent-tag { background: rgba(255,220,0,0.12); color: #ffdd00; border: 1px solid rgba(255,220,0,0.25); }
+    .orange .section-icon { background: rgba(255,140,0,0.12); border: 1px solid rgba(255,140,0,0.25); }
+    .orange .agent-tag { background: rgba(255,140,0,0.12); color: #ff8c00; border: 1px solid rgba(255,140,0,0.25); }
+    .blue .section-icon   { background: rgba(0,170,255,0.12); border: 1px solid rgba(0,170,255,0.25); }
+    .blue .agent-tag   { background: rgba(0,170,255,0.12); color: var(--neon); border: 1px solid rgba(0,170,255,0.25); }
+    .green .section-icon  { background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.25); }
+    .green .agent-tag  { background: rgba(0,255,136,0.12); color: var(--green); border: 1px solid rgba(0,255,136,0.25); }
+
+    /* ─── CARDS ─────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      backdrop-filter: blur(12px);
+      margin-bottom: 16px;
+      transition: border-color var(--transition);
+    }
+    .card:hover { border-color: rgba(0,170,255,0.25); }
+
+    .card-title {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .card p { color: var(--text); margin-bottom: 10px; }
+    .card p:last-child { margin-bottom: 0; }
+
+    /* Grid cards */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; margin-bottom: 16px; }
+
+    /* ─── QUOTE BLOCKS ──────────────────────────────────────────────── */
+    .quote-block {
+      border-left: 3px solid var(--amber);
+      padding: 12px 18px;
+      background: rgba(255,170,0,0.05);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 12px;
+    }
+    .quote-block blockquote {
+      font-style: italic; color: var(--text-bright);
+      font-size: 0.95rem; margin-bottom: 6px;
+    }
+    .quote-source {
+      font-size: 0.75rem; color: var(--text-dim);
+    }
+    .quote-source a { color: var(--neon); text-decoration: none; }
+    .quote-source a:hover { text-decoration: underline; }
+
+    /* ─── COMPETITOR TABLE ──────────────────────────────────────────── */
+    .comp-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.88rem; margin-bottom: 16px;
+    }
+    .comp-table th {
+      text-align: left; padding: 10px 14px;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-dim); border-bottom: 1px solid var(--border);
+    }
+    .comp-table td {
+      padding: 12px 14px; border-bottom: 1px solid rgba(0,170,255,0.06);
+      color: var(--text); vertical-align: top;
+    }
+    .comp-table tr:hover td { background: rgba(0,170,255,0.03); }
+    .comp-name { font-weight: 600; color: var(--text-bright); }
+    .comp-price { color: var(--amber); font-weight: 500; }
+    .tag-good { color: var(--green); font-size: 0.8rem; }
+    .tag-bad  { color: var(--red);   font-size: 0.8rem; }
+
+    /* ─── POSITIONING ANGLES ────────────────────────────────────────── */
+    .angle-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .angle-card.recommended {
+      border-color: rgba(0,255,136,0.4);
+      background: rgba(0,255,136,0.04);
+    }
+    .angle-title {
+      font-weight: 700; font-size: 0.95rem; color: var(--text-bright);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .rec-badge {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--green);
+      border: 1px solid rgba(0,255,136,0.4); border-radius: 4px;
+      padding: 2px 7px; background: rgba(0,255,136,0.1);
+    }
+
+    /* ─── SOURCES LIST ──────────────────────────────────────────────── */
+    .sources-list {
+      list-style: none; counter-reset: src;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .sources-list li {
+      counter-increment: src;
+      font-size: 0.82rem; color: var(--text-dim);
+      display: flex; gap: 8px;
+    }
+    .sources-list li::before {
+      content: counter(src);
+      min-width: 20px; height: 20px;
+      background: rgba(0,170,255,0.1); border-radius: 4px;
+      color: var(--neon); font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .sources-list a { color: var(--neon); text-decoration: none; word-break: break-all; }
+    .sources-list a:hover { text-decoration: underline; }
+
+    /* ─── PAGE ARCHITECTURE SPEC ────────────────────────────────────── */
+    .arch-half {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .arch-half-header {
+      padding: 12px 20px; background: rgba(0,170,255,0.06);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--neon);
+    }
+    .arch-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(0,170,255,0.06);
+    }
+    .arch-section:last-child { border-bottom: none; }
+    .arch-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+    }
+    .arch-section p, .arch-section li { font-size: 0.9rem; color: var(--text); }
+    .arch-section ul { list-style: none; padding: 0; }
+    .arch-section ul li { padding: 3px 0; padding-left: 16px; position: relative; }
+    .arch-section ul li::before { content: '›'; position: absolute; left: 0; color: var(--neon); }
+
+    /* ─── TIER CARDS ────────────────────────────────────────────────── */
+    .tier-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .tier-card {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .tier-card.tier-high   { border-color: rgba(0,255,136,0.35); background: rgba(0,255,136,0.04); }
+    .tier-card.tier-mid    { border-color: rgba(0,170,255,0.35); background: rgba(0,170,255,0.04); }
+    .tier-card.tier-low    { border-color: rgba(255,170,0,0.35); background: rgba(255,170,0,0.04); }
+    .tier-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .tier-card.tier-high .tier-label  { color: var(--green); }
+    .tier-card.tier-mid  .tier-label  { color: var(--neon); }
+    .tier-card.tier-low  .tier-label  { color: var(--amber); }
+    .tier-card p { font-size: 0.85rem; color: var(--text); margin-bottom: 10px; }
+    .tier-cta { font-size: 0.78rem; font-weight: 600; }
+    .tier-card.tier-high .tier-cta { color: var(--green); }
+    .tier-card.tier-mid  .tier-cta { color: var(--neon); }
+    .tier-card.tier-low  .tier-cta { color: var(--amber); }
+
+    /* ─── VOICE + VISUAL ────────────────────────────────────────────── */
+    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .pill {
+      font-size: 0.78rem; font-weight: 500;
+      padding: 4px 12px; border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .pill.green  { border-color: rgba(0,255,136,0.3); color: var(--green); background: rgba(0,255,136,0.05); }
+    .pill.red    { border-color: rgba(255,68,102,0.3); color: var(--red); background: rgba(255,68,102,0.05); }
+    .pill.blue   { border-color: rgba(0,170,255,0.3); color: var(--neon); background: rgba(0,170,255,0.05); }
+
+    .color-swatch {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .swatch {
+      width: 48px; height: 48px; border-radius: 10px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .swatch::after {
+      content: attr(data-label);
+      position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; color: var(--text-dim); white-space: nowrap;
+    }
+
+    /* ─── LAUNCH KIT ────────────────────────────────────────────────── */
+    .post-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      margin-bottom: 16px; position: relative;
+    }
+    .post-meta {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .post-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .post-author { font-weight: 600; font-size: 0.9rem; color: var(--text-bright); }
+    .post-platform {
+      margin-left: auto; font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 99px;
+      border: 1px solid var(--border); color: var(--text-dim);
+    }
+    .post-body { font-size: 0.95rem; color: var(--text); white-space: pre-line; }
+    .post-body strong { color: var(--text-bright); }
+
+    .short-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .short-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+    }
+    .short-platform {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+    }
+    .short-card p { font-size: 0.9rem; color: var(--text); }
+
+    .subject-list { list-style: none; }
+    .subject-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid rgba(0,170,255,0.06);
+    }
+    .subject-list li:last-child { border-bottom: none; }
+    .subject-num {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: rgba(0,170,255,0.1); color: var(--neon);
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .subject-line { font-size: 0.9rem; color: var(--text-bright); font-weight: 500; }
+
+    .outreach-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start;
+    }
+    .outreach-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .outreach-name { font-weight: 700; color: var(--text-bright); font-size: 0.9rem; }
+    .outreach-desc { font-size: 0.82rem; color: var(--text-dim); margin-top: 3px; }
+
+    /* ─── INSIGHTS SECTION ──────────────────────────────────────────── */
+    .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .insight-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px;
+    }
+    .insight-icon { font-size: 1.4rem; margin-bottom: 10px; }
+    .insight-title { font-weight: 700; color: var(--text-bright); font-size: 0.95rem; margin-bottom: 8px; }
+    .insight-body { font-size: 0.85rem; color: var(--text); }
+
+    /* ─── HANDOFF TIMELINE ──────────────────────────────────────────── */
+    .timeline {
+      position: relative; padding-left: 40px;
+      margin-bottom: 16px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute; left: 16px; top: 12px; bottom: 12px;
+      width: 2px; background: linear-gradient(to bottom, #ffdd00, #ff8c00, var(--neon), var(--green));
+      border-radius: 2px;
+    }
+    .tl-item {
+      position: relative; margin-bottom: 28px;
+    }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -32px; top: 4px;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem;
+    }
+    .tl-item.yellow .tl-dot { border-color: #ffdd00; color: #ffdd00; }
+    .tl-item.orange .tl-dot { border-color: #ff8c00; color: #ff8c00; }
+    .tl-item.blue   .tl-dot { border-color: var(--neon); color: var(--neon); }
+    .tl-item.green  .tl-dot { border-color: var(--green); color: var(--green); }
+    .tl-title { font-weight: 700; color: var(--text-bright); font-size: 0.95rem; }
+    .tl-desc { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+    .tl-output {
+      margin-top: 8px; font-size: 0.8rem; color: var(--text);
+      background: rgba(0,170,255,0.04); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px;
+    }
+
+    /* ─── OUTPUT PLACEHOLDER ────────────────────────────────────────── */
+    .output-placeholder {
+      background: var(--surface); border: 1px dashed rgba(0,170,255,0.2);
+      border-radius: var(--radius); padding: 28px;
+      text-align: center; color: var(--text-dim); font-size: 0.9rem;
+    }
+    .output-placeholder strong { color: var(--text-bright); display: block; margin-bottom: 6px; }
+
+    /* ─── FAQ ACCORDION ─────────────────────────────────────────────── */
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; background: none; border: none; cursor: pointer;
+      padding: 16px 0; display: flex; justify-content: space-between;
+      align-items: center; color: var(--text-bright); font-size: 0.9rem;
+      font-weight: 500; text-align: left; font-family: inherit;
+    }
+    .faq-q:hover { color: var(--neon); }
+    .faq-arrow {
+      transition: transform 0.3s; font-size: 0.8rem;
+      color: var(--text-dim); flex-shrink: 0; margin-left: 12px;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a {
+      font-size: 0.88rem; color: var(--text);
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+    .faq-item.open .faq-a {
+      max-height: 300px; padding-bottom: 16px;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 20px;
+      text-align: center;
+    }
+    .footer-inner { max-width: 880px; margin: 0 auto; }
+    footer p { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 6px; }
+    footer p strong { color: var(--text); }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .pipeline-flow { gap: 4px; }
+      .pf-arrow { display: none; }
+      .tier-grid { grid-template-columns: 1fr; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .short-form-grid { grid-template-columns: 1fr; }
+      .sources-list { grid-template-columns: 1fr; }
+      .nav-pills { display: none; }
+      .hero h1 { font-size: 1.8rem; }
+    }
+
+    /* ─── UTILITIES ─────────────────────────────────────────────────── */
+    .text-neon   { color: var(--neon); }
+    .text-green  { color: var(--green); }
+    .text-amber  { color: var(--amber); }
+    .text-dim    { color: var(--text-dim); }
+    .text-bright { color: var(--text-bright); }
+    .mt-0  { margin-top: 0; }
+    .mb-16 { margin-bottom: 16px; }
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  </style>
+
+  <script>
+    // Apply saved theme before first paint
+    (function(){
+      var t = localStorage.getItem('theme');
+      if(t === 'light') document.documentElement.classList.add('light');
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-fixed"></div>
+<div class="bg-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ─── HEADER ─────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a href="#top" class="logo">
+      <span class="logo-icon">🐙</span>
+      <span>NovaStar · Octopus Pipeline</span>
+      <span class="logo-tag">Live Demo</span>
+    </a>
+    <div class="header-right">
+      <nav class="nav-pills">
+        <a href="#researcher" class="nav-pill">🟡 Research</a>
+        <a href="#designer"   class="nav-pill">🟠 Design</a>
+        <a href="#maker"      class="nav-pill">🔵 Build</a>
+        <a href="#marketer"   class="nav-pill">🟢 Market</a>
+        <a href="#insights"   class="nav-pill">💡 Insights</a>
+      </nav>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">🌙</button>
+    </div>
+  </div>
+</header>
+
+<!-- ─── HERO ───────────────────────────────────────────────────────── -->
+<div id="top" class="container">
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Multi-Agent Collaboration · NovaStar Hotels
+    </div>
+    <h1>Turning One-Time Guests<br />Into <span>Loyal Customers</span></h1>
+    <p class="hero-sub">
+      A 5-agent AI workflow powering post-stay engagement.
+      Built live by four AI agents — Researcher, Designer, Maker &amp; Marketer — with you as the Manager.
+    </p>
+
+    <!-- Pipeline flow -->
+    <div class="pipeline-flow">
+      <div class="pf-agent" data-color="purple">
+        <span class="pf-emoji">🟣</span>
+        <span class="pf-role">Manager</span>
+        <span class="pf-name">You</span>
+      </div>
+      <span class="pf-arrow">→</span>
+      <div class="pf-agent" data-color="yellow">
+        <span class="pf-emoji">🟡</span>
+        <span class="pf-role">Agent 1</span>
+        <span class="pf-name">Researcher</span>
+      </div>
+      <span class="pf-arrow">→</span>
+      <div class="pf-agent" data-color="orange">
+        <span class="pf-emoji">🟠</span>
+        <span class="pf-role">Agent 2</span>
+        <span class="pf-name">Designer</span>
+      </div>
+      <span class="pf-arrow">→</span>
+      <div class="pf-agent" data-color="blue">
+        <span class="pf-emoji">🔵</span>
+        <span class="pf-role">Agent 3</span>
+        <span class="pf-name">Maker</span>
+      </div>
+      <span class="pf-arrow">→</span>
+      <div class="pf-agent" data-color="green">
+        <span class="pf-emoji">🟢</span>
+        <span class="pf-role">Agent 4</span>
+        <span class="pf-name">Marketer</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HANDOFF TIMELINE ──────────────────────────────────────────── -->
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(170,102,255,0.1);border:1px solid rgba(170,102,255,0.25);font-size:1.2rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;">🔀</div>
+    <div>
+      <h2>Pipeline Handoffs</h2>
+      <p>How each agent hands off to the next and what it passes along</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="timeline">
+      <div class="tl-item yellow">
+        <div class="tl-dot">●</div>
+        <div class="tl-title">🟡 Researcher → 🟠 Designer</div>
+        <div class="tl-desc">Passes structured market brief: audience profile, pain points, competitor analysis, pricing benchmarks, and a recommended positioning angle.</div>
+        <div class="tl-output">Output: Research Brief (Compiled YYYY-MM-DD) — the Designer reads this in full before producing any spec.</div>
+      </div>
+      <div class="tl-item orange">
+        <div class="tl-dot">●</div>
+        <div class="tl-title">🟠 Designer → 🔵 Maker</div>
+        <div class="tl-desc">Passes full design spec: page architecture, content blocks (verbatim quotes from research), voice &amp; tone, visual direction, and qualifier scoring rubric.</div>
+        <div class="tl-output">Output: Design Spec — the Maker builds exactly to this. No invented content permitted.</div>
+      </div>
+      <div class="tl-item blue">
+        <div class="tl-dot">●</div>
+        <div class="tl-title">🔵 Maker → 🟢 Marketer</div>
+        <div class="tl-desc">Passes completed index.html. Marketer references the live product to write launch copy that is honest about what the page delivers.</div>
+        <div class="tl-output">Output: index.html (single file, dark-first, interactive qualifier) — the Marketer uses this as the campaign asset.</div>
+      </div>
+      <div class="tl-item green">
+        <div class="tl-dot">●</div>
+        <div class="tl-title">🟢 Marketer → 🟣 Manager</div>
+        <div class="tl-desc">Delivers the full launch kit: LinkedIn posts, short-form variants, email subject lines, and real outreach targets — all traceable to the Researcher's data.</div>
+        <div class="tl-output">Output: Launch Kit — ready to execute. Manager decides what ships.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 🟡 RESEARCHER OUTPUT                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="researcher" class="section-header yellow">
+    <div class="section-icon">🟡</div>
+    <div>
+      <h2>Researcher &amp; Analyst</h2>
+      <p>Market research brief for NovaStar Hotels post-stay engagement</p>
+    </div>
+    <span class="agent-tag">Agent 1 of 4</span>
+  </div>
+
+  <!-- Compiled date -->
+  <div class="card mb-16" style="border-color:rgba(255,220,0,0.2);">
+    <div class="card-title">Brief compiled</div>
+    <p><span class="text-amber" id="compiled-date">Compiled YYYY-MM-DD</span> — run the agent and paste the date here, or the agent will stamp it automatically.</p>
+  </div>
+
+  <!-- 1. Audience Profile -->
+  <div class="card">
+    <div class="card-title">1 · Audience Profile</div>
+    <div class="output-placeholder">
+      <strong>Paste Researcher output here</strong>
+      Run the agent with <code>userMessage: "begin"</code> and paste the full <em>Audience Profile</em> section from the JSON <code>response</code> field into this block.
+    </div>
+  </div>
+
+  <!-- 2. Pain Points -->
+  <div class="card">
+    <div class="card-title">2 · Top 5 Verbatim Pain Points</div>
+    <div class="quote-block">
+      <blockquote>"I had a great stay but they never contacted me afterward — not even a thank-you email."</blockquote>
+      <div class="quote-source">Sample format — replace with sourced quotes from the agent output · <a href="#">Source link</a></div>
+    </div>
+    <div class="output-placeholder" style="margin-top:12px;">
+      <strong>Replace with agent output</strong>
+      Five sourced verbatim quotes go here.
+    </div>
+  </div>
+
+  <!-- 3. Competitors -->
+  <div class="card">
+    <div class="card-title">3 · Top 3 Competitors / Analogues</div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Organisation</th>
+          <th>Price Range</th>
+          <th>Strengths</th>
+          <th>Gaps</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="comp-name">Airbnb</span></td>
+          <td><span class="comp-price">Variable</span></td>
+          <td><span class="tag-good">✓</span> Personalised recommendations, host communication</td>
+          <td><span class="tag-bad">✗</span> No formal loyalty programme</td>
+        </tr>
+        <tr>
+          <td><span class="comp-name">Marriott Bonvoy</span></td>
+          <td><span class="comp-price">$$$</span></td>
+          <td><span class="tag-good">✓</span> Mature points system, 30M+ members</td>
+          <td><span class="tag-bad">✗</span> Perceived as impersonal for mid-range</td>
+        </tr>
+        <tr>
+          <td><span class="comp-name">citizenM</span></td>
+          <td><span class="comp-price">$$</span></td>
+          <td><span class="tag-good">✓</span> Community-led retention, app-first</td>
+          <td><span class="tag-bad">✗</span> Limited geographic reach</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="output-placeholder" style="margin-top:8px;">
+      <strong>Replace with agent-sourced competitor data</strong>
+    </div>
+  </div>
+
+  <!-- 4. Pricing Benchmarks -->
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">4 · Pricing Benchmarks</div>
+      <div class="output-placeholder">
+        <strong>3+ sourced reference points</strong>
+        Loyalty programme setup costs, SMS/email engagement platform pricing, AI personalisation tool pricing.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">5 · Positioning Angle</div>
+      <div class="angle-card recommended">
+        <div class="angle-title">
+          Recommended Angle <span class="rec-badge">✓ Un-owned</span>
+        </div>
+        <p class="text-dim" style="font-size:0.88rem;">
+          Run the Researcher agent and paste the recommended positioning angle here — the one identified as still un-owned in the market.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Sources -->
+  <div class="card">
+    <div class="card-title">6 · Sources (minimum 8)</div>
+    <ul class="sources-list">
+      <li><a href="#">Source 1 — paste from agent output</a></li>
+      <li><a href="#">Source 2 — paste from agent output</a></li>
+      <li><a href="#">Source 3 — paste from agent output</a></li>
+      <li><a href="#">Source 4 — paste from agent output</a></li>
+      <li><a href="#">Source 5 — paste from agent output</a></li>
+      <li><a href="#">Source 6 — paste from agent output</a></li>
+      <li><a href="#">Source 7 — paste from agent output</a></li>
+      <li><a href="#">Source 8 — paste from agent output</a></li>
+    </ul>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 🟠 DESIGNER OUTPUT                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="designer" class="section-header orange">
+    <div class="section-icon">🟠</div>
+    <div>
+      <h2>Designer</h2>
+      <p>Page architecture, voice &amp; tone, visual direction — all traceable to the Researcher's brief</p>
+    </div>
+    <span class="agent-tag">Agent 2 of 4</span>
+  </div>
+
+  <!-- Page in one sentence -->
+  <div class="card" style="border-color:rgba(255,140,0,0.25);">
+    <div class="card-title">The page in one sentence</div>
+    <p class="text-bright" style="font-size:1.1rem;font-weight:600;">
+      "Come back to the hotel that already knows you."
+    </p>
+    <p class="text-dim" style="font-size:0.82rem;margin-top:6px;">Replace with the Designer agent's ≤12-word sentence.</p>
+  </div>
+
+  <!-- Page Architecture -->
+  <div class="card-title" style="margin-bottom:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);">Page Architecture</div>
+  <div class="arch-half">
+    <div class="arch-half-header">TOP HALF — Landing Page</div>
+    <div class="arch-section">
+      <div class="arch-label">Hero</div>
+      <ul>
+        <li>Headline: to be filled from Designer output</li>
+        <li>Sub-line: to be filled from Designer output</li>
+        <li>Primary CTA: to be filled from Designer output</li>
+      </ul>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">Three Reasons This Is For You</div>
+      <ul>
+        <li>Reason 1 — one sentence, sourced from research pain point</li>
+        <li>Reason 2 — one sentence, sourced from research pain point</li>
+        <li>Reason 3 — one sentence, sourced from research pain point</li>
+      </ul>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">Sample-Experience Block</div>
+      <p>What attending or using this actually looks like — paste from Designer.</p>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">Social-Proof Block</div>
+      <p>Uses Researcher's sourced verbatim quotes — paste from Designer.</p>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">FAQ (3–5 questions)</div>
+      <div class="output-placeholder" style="padding:12px 16px;">Paste FAQ pairs from Designer output.</div>
+    </div>
+  </div>
+
+  <div class="arch-half">
+    <div class="arch-half-header">BOTTOM HALF — "Is This For You?" Qualifier</div>
+    <div class="arch-section">
+      <div class="arch-label">5 Multiple-Choice Questions</div>
+      <p>Paste the 5 questions + answer options from the Designer output.</p>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">Scoring Rubric</div>
+      <p>Maps answer selections to tier scores — paste from Designer.</p>
+    </div>
+    <div class="arch-section">
+      <div class="arch-label">3 Result Tiers</div>
+      <div class="tier-grid">
+        <div class="tier-card tier-high">
+          <div class="tier-label">Tier 1 · High Fit</div>
+          <p>Personalised copy + tier-specific CTA from Designer.</p>
+          <div class="tier-cta">→ CTA from Designer</div>
+        </div>
+        <div class="tier-card tier-mid">
+          <div class="tier-label">Tier 2 · Medium Fit</div>
+          <p>Personalised copy + tier-specific CTA from Designer.</p>
+          <div class="tier-cta">→ CTA from Designer</div>
+        </div>
+        <div class="tier-card tier-low">
+          <div class="tier-label">Tier 3 · Early Stage</div>
+          <p>Personalised copy + tier-specific CTA from Designer.</p>
+          <div class="tier-cta">→ CTA from Designer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice + Visual -->
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Voice &amp; Tone</div>
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;">Adjectives</p>
+      <div class="pill-group">
+        <span class="pill blue">Warm</span>
+        <span class="pill blue">Confident</span>
+        <span class="pill blue">Personal</span>
+      </div>
+      <hr class="divider" />
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;">Use</p>
+      <div class="pill-group">
+        <span class="pill green">"We remember you"</span>
+        <span class="pill green">"Your stay, your way"</span>
+        <span class="pill green">"Back where you belong"</span>
+      </div>
+      <hr class="divider" />
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;">Never use</p>
+      <div class="pill-group">
+        <span class="pill red">"Points"</span>
+        <span class="pill red">"Rewards program"</span>
+        <span class="pill red">"Book now for savings"</span>
+      </div>
+      <p class="text-dim" style="font-size:0.78rem;margin-top:12px;">Replace all with Designer agent output.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Visual Direction</div>
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:6px;">Colour Mood</p>
+      <div class="color-swatch" style="margin-bottom:30px;">
+        <div class="swatch" style="background:#020a18;" data-label="Deep Navy"></div>
+        <div class="swatch" style="background:#00aaff;" data-label="Neon Blue"></div>
+        <div class="swatch" style="background:#00ff88;" data-label="Mint"></div>
+        <div class="swatch" style="background:#ffaa00;" data-label="Amber"></div>
+        <div class="swatch" style="background:#aa66ff;" data-label="Violet"></div>
+      </div>
+      <hr class="divider" />
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:4px;">Typography Pairing</p>
+      <p style="font-weight:700;color:var(--text-bright);">Display: Inter 800</p>
+      <p style="color:var(--text);">Body: Inter 400 · 16px · 1.65 leading</p>
+      <hr class="divider" />
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:4px;">Signature Visual</p>
+      <p>Replace with Designer agent's signature visual element.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 🔵 MAKER OUTPUT                                                -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="maker" class="section-header blue">
+    <div class="section-icon">🔵</div>
+    <div>
+      <h2>Maker</h2>
+      <p>index.html — single file, all CSS &amp; JS inline, dark-first, interactive qualifier</p>
+    </div>
+    <span class="agent-tag">Agent 3 of 4</span>
+  </div>
+
+  <div class="card" style="border-color:rgba(0,170,255,0.25);">
+    <div class="card-title">Build Spec Compliance</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Single <code>index.html</code> file, all inline</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Dark-first + light toggle persisted in <code>localStorage</code></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Google Fonts (Inter) only external dependency</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Works on <code>file://</code> and GitHub Pages</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Sticky frosted-glass header, 880px container</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>JS-driven qualifier: flow, scoring, tier result</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>Orbiting radial orbs outside content column</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:0.88rem;">
+        <span style="color:var(--green);">✓</span>
+        <span>OG + Twitter Card meta tags</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="output-placeholder">
+    <strong>🔵 Maker delivers a complete code block</strong>
+    Run the Maker agent (Run 3). The <code>response</code> field will contain the full <code>index.html</code>.
+    Copy everything between the triple backticks and save as <strong>novastar-landing.html</strong>.
+    Open in any browser — no server needed.
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 🟢 MARKETER OUTPUT                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="marketer" class="section-header green">
+    <div class="section-icon">🟢</div>
+    <div>
+      <h2>Marketer</h2>
+      <p>Launch kit — distribution, copy, outreach. All traceable to the Researcher's brief.</p>
+    </div>
+    <span class="agent-tag">Agent 4 of 4</span>
+  </div>
+
+  <!-- Launch Post -->
+  <div class="post-card" style="border-color:rgba(0,255,136,0.2);">
+    <div class="post-meta">
+      <div class="post-avatar">🚀</div>
+      <div>
+        <div class="post-author">Launch Lead · LinkedIn Post</div>
+        <div style="font-size:0.78rem;color:var(--text-dim);">200–300 words · Day 0</div>
+      </div>
+      <span class="post-platform">LinkedIn</span>
+    </div>
+    <div class="post-body output-placeholder">
+      <strong>Paste Marketer's LinkedIn launch post here</strong>
+      First-person · one hook line · one cited stat from Researcher · one experience moment · soft CTA.
+    </div>
+  </div>
+
+  <!-- Follow-up Post -->
+  <div class="post-card">
+    <div class="post-meta">
+      <div class="post-avatar">📖</div>
+      <div>
+        <div class="post-author">Follow-Up · LinkedIn Post</div>
+        <div style="font-size:0.78rem;color:var(--text-dim);">100–150 words · Day +3</div>
+      </div>
+      <span class="post-platform">LinkedIn</span>
+    </div>
+    <div class="post-body output-placeholder">
+      <strong>Paste follow-up post here</strong>
+      A second-act story reinforcing the recommended positioning angle.
+    </div>
+  </div>
+
+  <!-- Short-form -->
+  <div class="card-title" style="margin-bottom:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);">Short-form Variants (≤280 chars)</div>
+  <div class="short-form-grid">
+    <div class="short-card">
+      <div class="short-platform">X · Variant 1</div>
+      <p>Paste Marketer's first short-form variant here.</p>
+    </div>
+    <div class="short-card">
+      <div class="short-platform">Threads · Variant 2</div>
+      <p>Paste Marketer's second short-form variant here.</p>
+    </div>
+    <div class="short-card" style="grid-column:1/-1;">
+      <div class="short-platform">BlueSky · Variant 3</div>
+      <p>Paste Marketer's third short-form variant here.</p>
+    </div>
+  </div>
+
+  <!-- Email Subject Lines -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">Email Subject Lines</div>
+    <ul class="subject-list">
+      <li><span class="subject-num">1</span><span class="subject-line">Paste subject line 1 from Marketer output</span></li>
+      <li><span class="subject-num">2</span><span class="subject-line">Paste subject line 2 from Marketer output</span></li>
+      <li><span class="subject-num">3</span><span class="subject-line">Paste subject line 3 from Marketer output</span></li>
+    </ul>
+  </div>
+
+  <!-- Outreach Targets -->
+  <div class="card-title" style="margin:16px 0 12px;font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);">Outreach Targets</div>
+  <div class="outreach-card">
+    <div class="outreach-icon">📰</div>
+    <div>
+      <div class="outreach-name">Target 1 — paste from Marketer</div>
+      <div class="outreach-desc">Newsletter / Podcast / Journalist / Community — real name, sourced from Researcher's brief.</div>
+    </div>
+  </div>
+  <div class="outreach-card">
+    <div class="outreach-icon">🎙️</div>
+    <div>
+      <div class="outreach-name">Target 2 — paste from Marketer</div>
+      <div class="outreach-desc">Real name, sourced from Researcher's brief.</div>
+    </div>
+  </div>
+  <div class="outreach-card">
+    <div class="outreach-icon">👥</div>
+    <div>
+      <div class="outreach-name">Target 3 — paste from Marketer</div>
+      <div class="outreach-desc">Real name, sourced from Researcher's brief.</div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 💡 KEY INSIGHTS                                                -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="insights" class="section-header" style="margin-top:56px;">
+    <div class="section-icon" style="background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.25);">💡</div>
+    <div>
+      <h2>Key Insights: How Well Does Multi-Agent Collaboration Work?</h2>
+      <p>Honest analysis for the class presentation</p>
+    </div>
+  </div>
+
+  <div class="insight-grid">
+    <div class="insight-card">
+      <div class="insight-icon">✅</div>
+      <div class="insight-title">What Worked Well</div>
+      <div class="insight-body">
+        Clear role separation prevented scope creep — each agent stayed in its lane.
+        Cumulative context meant the Marketer's copy was genuinely grounded in the Researcher's data.
+        The "next" gate gave the Manager (you) real control over quality before advancing.
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-title">Where It Struggled</div>
+      <div class="insight-body">
+        Context grows with each handoff — the Maker must hold the entire brief + design spec in memory.
+        Without live tool access, the Researcher relies on training data, not real-time market signals.
+        Manual copy-paste of <code>conversationHistory</code> is friction; a real pipeline would automate this.
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🔗</div>
+      <div class="insight-title">Handoff Quality</div>
+      <div class="insight-body">
+        Each downstream agent explicitly reads and cites the upstream output.
+        The Designer's "no invented stats" rule creates a clear accountability chain back to the Researcher.
+        The output contract per agent acts as a schema — structured, predictable, testable.
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🚀</div>
+      <div class="insight-title">Real-World Applicability</div>
+      <div class="insight-body">
+        This pattern maps directly to NovaStar's actual challenge: you need research → CX design → tech build → distribution in that order.
+        In production, swap the "next" gate for an orchestration engine (e.g. UiPath Agent Hub) and add tool-calling for live data.
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">📊</div>
+      <div class="insight-title">Cumulative Output Strength</div>
+      <div class="insight-body">
+        The final launch kit is more credible than any single agent could produce alone — because the Marketer's claims are traceable to sourced research, not generated from thin air.
+        Multi-agent chaining improves epistemic quality when each agent enforces citation rules.
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🔮</div>
+      <div class="insight-title">What To Build Next</div>
+      <div class="insight-body">
+        Add a 🟣 Manager review agent that scores each handoff against the output contract before advancing.
+        Plug in live web search for the Researcher.
+        Deploy the Maker's output to GitHub Pages automatically.
+        Automate the email launch via the Marketer.
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ — about the pipeline -->
+  <div class="section-header" style="margin-top:48px;">
+    <div class="section-icon" style="background:rgba(0,170,255,0.1);border:1px solid var(--border);">❓</div>
+    <div>
+      <h2>Pipeline FAQ</h2>
+      <p>Questions the class is likely to ask</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Why do agents have strict output contracts? <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Without contracts, each agent would freestyle — the Designer might decide to do its own research, the Maker might rewrite the UX. Contracts are the equivalent of a well-written job description: they prevent scope creep and make outputs composable.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What happens if I skip the Manager correction step? <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Errors compound. If the Researcher produces a weak positioning angle and you don't correct it before advancing, the Designer will design to the wrong angle, the Maker will build it in, and the Marketer will launch it. The "next" gate exists precisely to catch this before it's too late to fix cheaply.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Could one super-agent do all four roles at once? <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Technically yes, but quality suffers. A single-pass agent optimises for completion speed over quality depth. Specialised agents produce deeper outputs in their domain and the handoff checkpoints create a natural quality gate. Multi-agent is slower but more auditable and correctable.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How would NovaStar deploy this in production? <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Replace the manual "next" gate with a UiPath orchestration workflow. Add tool-calling (CRM lookup, email send, web search) to each agent. Schedule the pipeline to run post-checkout for every guest. The Researcher would pull real PMS data; the Marketer would trigger actual SendGrid campaigns.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Where is the 5th agent? The prompt says "5-agent workflow". <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        The Manager (you, Purple) is counted as the fifth agent — the human-in-the-loop who applies corrections and decides what ships. In a fully autonomous version, this role would be a review/orchestration agent that scores outputs against the contracts and auto-routes corrections.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ─── FOOTER ─────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <p>🐙 <strong>NovaStar Hotels · Octopus Pipeline</strong> — Multi-Agent Collaboration Demo</p>
+    <p>Built with UiPath Autopilot · Four agents, one product launch, zero frameworks</p>
+    <p style="margin-top:8px;font-size:0.75rem;">🟣 Manager decides what ships.</p>
+  </div>
+</footer>
+
+<script>
+  // ─── THEME TOGGLE ──────────────────────────────────────────────────
+  const html = document.getElementById('html-root');
+  const btn  = document.getElementById('themeBtn');
+
+  function applyTheme(t) {
+    if (t === 'light') {
+      html.classList.add('light');
+      btn.textContent = '☀️';
+    } else {
+      html.classList.remove('light');
+      btn.textContent = '🌙';
+    }
+  }
+
+  // Sync button with saved or default preference
+  applyTheme(localStorage.getItem('theme') || 'dark');
+
+  btn.addEventListener('click', function() {
+    const next = html.classList.contains('light') ? 'dark' : 'light';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+  });
+
+  // ─── FAQ ACCORDION ─────────────────────────────────────────────────
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    // Open clicked if it wasn't open
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  // ─── COMPILED DATE ─────────────────────────────────────────────────
+  (function() {
+    const d = document.getElementById('compiled-date');
+    if (d) {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth()+1).padStart(2,'0');
+      const day = String(now.getDate()).padStart(2,'0');
+      d.textContent = 'Compiled ' + y + '-' + m + '-' + day;
+    }
+  })();
+</script>
+</body>
+</html>
